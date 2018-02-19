@@ -1,9 +1,15 @@
-# 计算给定数据集的香农熵
+# 通过给定数据建立决策树
+'''
+对于当前层数据：
+    1.选择使信息增益最大的特征
+    2.对这个特征中的每个数据，使用同样的(->1.)算法建立子树
+'''
 
 from math import log
 import operator
 
 
+# 计算给定数据集的香农熵
 # 香农熵反应数据的混乱程度
 # 熵越高，混合的数据越多
 # 熵为非负数
@@ -24,6 +30,7 @@ def calcShannonEnt(dataSet):
     return shannonEnt
 
 
+# 提取axis轴数据为value的向量
 def splitDataSet(dataSet, axis, value):
     retDataSet = []  # 使用拷贝建立新的划分列表
     for featVec in dataSet:  # 对于原数据的所有向量
@@ -34,6 +41,7 @@ def splitDataSet(dataSet, axis, value):
     return retDataSet
 
 
+# 选择数据增益最大的特征
 def chooseBestFeatureToSplit(dataSet):
     numFeatures = len(dataSet[0]) - 1  # 特征个数  len-1个特征，一个标签
     baseEntropy = calcShannonEnt(dataSet)  # 基准熵(不使用任何划分时数据的混乱程度)
@@ -66,7 +74,8 @@ def chooseBestFeatureToSplit(dataSet):
     return bestFeature  # 返回使信息增益最大的特征
 
 
-def majorityCnt(classList):  # 多数表决来定义子节点的分类
+# 多数表决来定义子节点的分类
+def majorityCnt(classList):
     classCount = {}  # 字典 类别->个数
     for vote in classList:
         if vote not in classCount.keys():
@@ -76,6 +85,7 @@ def majorityCnt(classList):  # 多数表决来定义子节点的分类
     return sortedClassCount[0][0]  # 返回个数最多的(第0个)元素的类别
 
 
+# 建立树
 def createTree(dataSet, labels):
     classList = [e[-1] for e in dataSet]  # 获得所有类标签
     if classList.count(classList[0]) == len(classList):  # 终止情况1:所有类标签相同
