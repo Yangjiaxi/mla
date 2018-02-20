@@ -7,6 +7,7 @@
 
 from math import log
 import operator
+import treePlotter as tplt
 
 
 # 计算给定数据集的香农熵
@@ -108,6 +109,19 @@ def createTree(dataSet, labels):
     return myTree
 
 
+def classify(inputTree, featLabels, testVec):
+    firstStr = list(inputTree.keys())[0]
+    secondDict = inputTree[firstStr]
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == "dict":
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+
+
 # 生成数据集
 def createDataSet():
     dataSet = [[1, 1, 'yes'],
@@ -117,3 +131,36 @@ def createDataSet():
                [0, 1, 'no']]
     labels = ['no surfacing', 'flippers']
     return dataSet, labels
+
+
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'wb')
+    pickle.dump(inputTree, fw)
+    fw.close()
+
+
+def grabTree(filename):
+    import pickle
+    fr = open(filename, 'rb')
+    return pickle.load(fr)
+
+
+if __name__ == "__main__":
+    myDat, labels = createDataSet()
+    print(labels)
+    myTrees = tplt.retrieveTree(0)
+    print(myTrees)
+    print(classify(myTrees, labels, [1, 0]))
+    print(classify(myTrees, labels, [1, 1]))
+    storeTree(myTrees, "classifierStorage.txt")
+    print("Saved!")
+    gt = grabTree("classifierStorage.txt")
+    print("Loaded!")
+    print(gt)
+    fr = open("lenses.txt")
+    lenses = [inst.strip().split('\t') for inst in fr.readlines()]
+    lensesLabels = ["age", "prescript", "astigmatic", "tearRate"]
+    lenseTree = createTree(lenses, lensesLabels)
+    print(lenseTree)
+    tplt.createPlot(lenseTree)
